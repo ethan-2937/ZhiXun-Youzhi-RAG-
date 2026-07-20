@@ -11,10 +11,10 @@
 
 ## 验收标准
 
-- [ ] `.env`、`data/`、真实资料、构建产物和依赖目录不进入首个提交。
-- [ ] `scripts/verify.ps1` 在发布前通过。
-- [ ] GitHub 与 Codeup 的 `main` 指向同一个提交。
-- [ ] 后续发布脚本在脏工作区、敏感路径被跟踪或验证失败时拒绝推送。
+- [x] `.env`、`data/`、真实资料、构建产物和依赖目录不进入首个提交。
+- [x] `scripts/verify.ps1` 在发布前通过。
+- [x] GitHub 与 Codeup 的 `main` 指向同一个提交。
+- [x] 后续发布脚本在脏工作区、敏感路径被跟踪或验证失败时拒绝推送。
 
 ## 约束
 
@@ -24,9 +24,9 @@
 
 ## 验证
 
-- 单元/契约测试：发布脚本的机械前置检查与统一 Harness。
+- 单元/契约测试：统一 Harness、31 个 Spring 测试、9 个 Vue 测试和 16 个 Python 测试通过；发布脚本完成干净工作区和跟踪路径审计。
 - RAG 离线评测：沿用统一验证中的固定评测。
-- 手工/集成证据：比较两个远端 `refs/heads/main` 提交哈希。
+- 手工/集成证据：首个提交 `7453484` 已推送到 GitHub `origin/main` 与 Codeup `codeup/main`；最终记录提交再次通过双远端脚本同步。
 - 统一命令：`powershell -ExecutionPolicy Bypass -File scripts/verify.ps1`
 
 ## 交付
