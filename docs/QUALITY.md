@@ -31,3 +31,11 @@ powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 - 权限泄漏是硬失败，不能被平均准确率抵消。
 - 修改分块、Embedding、检索、重排、Prompt 或模型后，必须与固定基线比较。
 - LLM-as-judge 只能作为补充；ACL、引用 ID、覆盖率和 payload 上限使用确定性检查。
+
+## 检索评测 v2
+
+- 固定数据集把主体、空间、可回答性、必需文档和禁止文档写成显式契约。
+- 诊断采集的是相似度阈值应用前、ACL 过滤后的候选；越权候选无论分数多低都是硬失败。
+- 参数扫描至少观察 Recall@K、MRR、nDCG、拒答准确率、重复文档率和 P95 延迟，不能只看单个演示问题。
+- 诊断接口默认关闭且不返回标题、正文、章节、摘录或模型上下文；生成结果只能写入忽略目录。
+- 完整操作流程和调参顺序见 `docs/RETRIEVAL_TUNING.md`。

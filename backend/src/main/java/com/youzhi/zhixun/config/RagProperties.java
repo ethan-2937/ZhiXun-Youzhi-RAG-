@@ -10,6 +10,7 @@ public class RagProperties {
     private Embedding embedding = new Embedding();
     private Knowledge knowledge = new Knowledge();
     private Retrieval retrieval = new Retrieval();
+    private Diagnostics diagnostics = new Diagnostics();
 
     public boolean isEnabled() {
         return enabled;
@@ -41,6 +42,14 @@ public class RagProperties {
 
     public void setRetrieval(Retrieval retrieval) {
         this.retrieval = retrieval;
+    }
+
+    public Diagnostics getDiagnostics() {
+        return diagnostics;
+    }
+
+    public void setDiagnostics(Diagnostics diagnostics) {
+        this.diagnostics = diagnostics;
     }
 
     public static class Embedding {
@@ -119,5 +128,15 @@ public class RagProperties {
         public void setMaxCitations(int maxCitations) { this.maxCitations = maxCitations; }
         public int getMaxExcerptChars() { return maxExcerptChars; }
         public void setMaxExcerptChars(int maxExcerptChars) { this.maxExcerptChars = maxExcerptChars; }
+    }
+
+    public static class Diagnostics {
+        private boolean enabled;
+        private int maxCandidates = 50;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public int getMaxCandidates() { return maxCandidates; }
+        public void setMaxCandidates(int maxCandidates) { this.maxCandidates = maxCandidates; }
     }
 }

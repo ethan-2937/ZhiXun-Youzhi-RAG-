@@ -12,6 +12,8 @@ import com.youzhi.zhixun.vo.DemoChatResponseVO;
 import com.youzhi.zhixun.vo.DemoUserVO;
 import com.youzhi.zhixun.vo.KnowledgeNodeVO;
 import com.youzhi.zhixun.vo.KnowledgeSpaceVO;
+import com.youzhi.zhixun.vo.RetrievalCandidateVO;
+import com.youzhi.zhixun.vo.RetrievalDiagnosticsVO;
 import com.youzhi.zhixun.vo.WorkspaceVO;
 import jakarta.annotation.PostConstruct;
 import org.springframework.http.HttpStatus;
@@ -24,7 +26,7 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class InMemoryRagQueryService implements RagQueryService {
+public class InMemoryRagQueryService implements RagQueryService, RetrievalDiagnosticsService {
     private static final String MODE = "REAL_EMBEDDING_RETRIEVAL";
 
     private final RagProperties properties;
@@ -106,19 +108,9 @@ public class InMemoryRagQueryService implements RagQueryService {
     @Override
     public DemoChatResponseVO answer(String question, String spaceId, String userId) {
         ensureReady();
-        boolean hasAuthorizedCandidate = index.stream()
-            .map(EmbeddedChunk::chunk)
-            .anyMatch(chunk -> isAuthorized(chunk.allowedUserIds(), userId)
-                && (spaceId == null || spaceId.isBlank() || chunk.spaceId().equals(spaceId)));
-        if (!hasAuthorizedCandidate) return insufficient();
-        float[] queryVector = normalize(embeddingClient.embed(List.of(question.strip())).getFirst());
-        List<ScoredChunk> matches = index.stream()
-            .filter(item -> isAuthorized(item.chunk().allowedUserIds(), userId))
-            .filter(item -> spaceId == null || spaceId.isBlank() || item.chunk().spaceId().equals(spaceId))
-            .map(item -> new ScoredChunk(item.chunk(), dot(queryVector, item.vector())))
+        List<ScoredChunk> matches = rankAuthorized(question, spaceId, userId, properties.getRetrieval().getTopK())
+            .stream()
             .filter(item -> item.score() >= properties.getRetrieval().getMinScore())
-            .sorted(Comparator.comparingDouble(ScoredChunk::score).reversed())
-            .limit(properties.getRetrieval().getTopK())
             .toList();
         if (matches.isEmpty()) return insufficient();
 
@@ -126,6 +118,46 @@ public class InMemoryRagQueryService implements RagQueryService {
         if (citations.isEmpty()) return insufficient();
         String answer = composeExtractiveAnswer(citations);
         return new DemoChatResponseVO("answered", answer, true, MODE, citations, List.of());
+    }
+
+    @Override
+    public RetrievalDiagnosticsVO diagnose(String question, String spaceId, int limit, String userId) {
+        if (!properties.getDiagnostics().isEnabled()) {
+            throw new RagException("RAG_DIAGNOSTICS_DISABLED", "检索诊断未启用", HttpStatus.NOT_FOUND);
+        }
+        ensureReady();
+        int boundedLimit = Math.min(limit, properties.getDiagnostics().getMaxCandidates());
+        List<ScoredChunk> matches = rankAuthorized(question, spaceId, userId, boundedLimit);
+        List<RetrievalCandidateVO> candidates = new ArrayList<>(matches.size());
+        for (int index = 0; index < matches.size(); index++) {
+            ScoredChunk match = matches.get(index);
+            candidates.add(new RetrievalCandidateVO(
+                index + 1,
+                match.chunk().documentId(),
+                match.chunk().chunkId(),
+                roundedScore(match.score())
+            ));
+        }
+        return new RetrievalDiagnosticsVO(MODE, !matches.isEmpty(), List.copyOf(candidates));
+    }
+
+    private List<ScoredChunk> rankAuthorized(String question, String spaceId, String userId, int limit) {
+        List<EmbeddedChunk> authorized = index.stream()
+            .filter(item -> isAuthorized(item.chunk().allowedUserIds(), userId))
+            .filter(item -> spaceId == null || spaceId.isBlank() || item.chunk().spaceId().equals(spaceId))
+            .toList();
+        if (authorized.isEmpty()) return List.of();
+
+        float[] queryVector = normalize(embeddingClient.embed(List.of(question.strip())).getFirst());
+        return authorized.stream()
+            .map(item -> new ScoredChunk(item.chunk(), dot(queryVector, item.vector())))
+            .sorted(Comparator.comparingDouble(ScoredChunk::score).reversed())
+            .limit(limit)
+            .toList();
+    }
+
+    private double roundedScore(double score) {
+        return Math.round(score * 1_000_000d) / 1_000_000d;
     }
 
     private List<KnowledgeSpaceVO> buildSpaces(List<KnowledgeDocument> authorized) {
@@ -231,6 +263,7 @@ public class InMemoryRagQueryService implements RagQueryService {
         RagProperties.Embedding embedding = properties.getEmbedding();
         RagProperties.Knowledge knowledge = properties.getKnowledge();
         RagProperties.Retrieval retrieval = properties.getRetrieval();
+        RagProperties.Diagnostics diagnostics = properties.getDiagnostics();
         boolean invalid = embedding.getApiKey() == null || embedding.getApiKey().isBlank()
             || embedding.getDimension() <= 0 || embedding.getBatchSize() < 1 || embedding.getBatchSize() > 64
             || embedding.getMaxInputChars() < 100 || knowledge.getChunkChars() < 100
@@ -241,7 +274,8 @@ public class InMemoryRagQueryService implements RagQueryService {
             || retrieval.getTopK() < 1 || retrieval.getTopK() > 20
             || retrieval.getMinScore() < -1 || retrieval.getMinScore() > 1
             || retrieval.getMaxCitations() < 1 || retrieval.getMaxCitations() > retrieval.getTopK()
-            || retrieval.getMaxExcerptChars() < 40 || retrieval.getMaxExcerptChars() > 1000;
+            || retrieval.getMaxExcerptChars() < 40 || retrieval.getMaxExcerptChars() > 1000
+            || diagnostics.getMaxCandidates() < 1 || diagnostics.getMaxCandidates() > 50;
         if (invalid) throw indexError("RAG 配置不合法");
     }
 

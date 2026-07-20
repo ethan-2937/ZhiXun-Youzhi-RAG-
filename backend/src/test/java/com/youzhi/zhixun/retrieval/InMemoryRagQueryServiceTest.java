@@ -6,6 +6,7 @@ import com.youzhi.zhixun.embedding.EmbeddingClient;
 import com.youzhi.zhixun.knowledge.KnowledgeDocument;
 import com.youzhi.zhixun.knowledge.KnowledgeSource;
 import com.youzhi.zhixun.vo.DemoChatResponseVO;
+import com.youzhi.zhixun.vo.RetrievalDiagnosticsVO;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
@@ -36,6 +37,15 @@ class InMemoryRagQueryServiceTest {
             .containsExactly("doc-authorized")
             .doesNotContain("doc-forbidden");
         assertThat(response.answer()).doesNotContain("禁止内容");
+
+        RetrievalDiagnosticsVO diagnostics = service.diagnose(
+            "申请制度", "space-test", 10, "test-user-allowed"
+        );
+        assertThat(diagnostics.hasAuthorizedCandidate()).isTrue();
+        assertThat(diagnostics.candidates())
+            .extracting(candidate -> candidate.documentId())
+            .containsOnly("doc-authorized")
+            .doesNotContain("doc-forbidden");
     }
 
     @Test
@@ -61,6 +71,55 @@ class InMemoryRagQueryServiceTest {
         assertThat(response.citations()).isEmpty();
         assertThat(embeddingClient.calls).hasSize(callsAfterIndexing);
         assertThat(service.workspace("test-user-denied").spaces()).isEmpty();
+
+        RetrievalDiagnosticsVO diagnostics = service.diagnose(
+            "禁止内容", "space-test", 10, "test-user-denied"
+        );
+        assertThat(diagnostics.hasAuthorizedCandidate()).isFalse();
+        assertThat(diagnostics.candidates()).isEmpty();
+        assertThat(embeddingClient.calls).hasSize(callsAfterIndexing);
+    }
+
+    @Test
+    void diagnosticsAppliesSpaceFilterAndConfiguredCandidateLimit() {
+        RagProperties properties = properties();
+        properties.getDiagnostics().setMaxCandidates(1);
+        InMemoryRagQueryService service = new InMemoryRagQueryService(
+            properties,
+            source(List.of(
+                document("doc-target", "目标资料", "目标空间内容。", "test-user-allowed", "space-target"),
+                document("doc-other", "其他资料", "其他空间内容。", "test-user-allowed", "space-other")
+            )),
+            new RecordingEmbeddingClient()
+        );
+        service.initialize();
+
+        RetrievalDiagnosticsVO diagnostics = service.diagnose(
+            "目标空间", "space-target", 50, "test-user-allowed"
+        );
+
+        assertThat(diagnostics.candidates()).hasSize(1);
+        assertThat(diagnostics.candidates().getFirst().documentId()).isEqualTo("doc-target");
+        assertThat(diagnostics.candidates().getFirst().rank()).isEqualTo(1);
+    }
+
+    @Test
+    void diagnosticsFailsClosedWhenDisabled() {
+        RagProperties properties = properties();
+        properties.getDiagnostics().setEnabled(false);
+        InMemoryRagQueryService service = new InMemoryRagQueryService(
+            properties,
+            source(List.of(document(
+                "doc-authorized", "授权制度", "授权内容。", "test-user-allowed"
+            ))),
+            new RecordingEmbeddingClient()
+        );
+        service.initialize();
+
+        assertThatThrownBy(() -> service.diagnose(
+            "授权制度", "space-test", 10, "test-user-allowed"
+        )).isInstanceOf(RagException.class)
+            .hasMessage("检索诊断未启用");
     }
 
     @Test
@@ -97,6 +156,7 @@ class InMemoryRagQueryServiceTest {
         properties.getRetrieval().setTopK(2);
         properties.getRetrieval().setMaxCitations(2);
         properties.getRetrieval().setMinScore(0.1);
+        properties.getDiagnostics().setEnabled(true);
         return properties;
     }
 
@@ -105,10 +165,20 @@ class InMemoryRagQueryServiceTest {
     }
 
     private KnowledgeDocument document(String id, String title, String content, String allowedUserId) {
+        return document(id, title, content, allowedUserId, "space-test");
+    }
+
+    private KnowledgeDocument document(
+        String id,
+        String title,
+        String content,
+        String allowedUserId,
+        String spaceId
+    ) {
         return new KnowledgeDocument(
             id,
             title,
-            "space-test",
+            spaceId,
             "测试空间",
             "node-test",
             "测试目录",

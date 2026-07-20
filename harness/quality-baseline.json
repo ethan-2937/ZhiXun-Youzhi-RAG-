@@ -24,16 +24,22 @@
     "backend/src/main/java/com/youzhi/zhixun/ZhixunApplication.java",
     "backend/src/main/java/com/youzhi/zhixun/config/SecurityConfig.java",
     "backend/src/main/java/com/youzhi/zhixun/config/RagProperties.java",
+    "backend/src/main/java/com/youzhi/zhixun/controller/RetrievalDiagnosticsController.java",
     "backend/src/main/java/com/youzhi/zhixun/embedding/OpenAiCompatibleEmbeddingClient.java",
     "backend/src/main/java/com/youzhi/zhixun/knowledge/JsonlKnowledgeSource.java",
     "backend/src/main/java/com/youzhi/zhixun/service/KnowledgeFileService.java",
     "backend/src/main/java/com/youzhi/zhixun/service/impl/KnowledgeFileServiceImpl.java",
     "backend/src/main/java/com/youzhi/zhixun/retrieval/InMemoryRagQueryService.java",
+    "backend/src/main/java/com/youzhi/zhixun/retrieval/RetrievalDiagnosticsService.java",
+    "backend/src/main/java/com/youzhi/zhixun/vo/RetrievalCandidateVO.java",
+    "backend/src/main/java/com/youzhi/zhixun/vo/RetrievalDiagnosticsRequestVO.java",
+    "backend/src/main/java/com/youzhi/zhixun/vo/RetrievalDiagnosticsVO.java",
     "backend/src/main/java/com/youzhi/zhixun/service/impl/AuthServiceImpl.java",
     "backend/src/test/java/com/youzhi/zhixun/controller/AuthControllerTest.java",
     "backend/src/test/java/com/youzhi/zhixun/dingtalk/OpenApiDingTalkIdentityClientTest.java",
     "backend/src/test/java/com/youzhi/zhixun/service/impl/AuthServiceImplTest.java",
     "backend/src/test/java/com/youzhi/zhixun/controller/DemoExperienceControllerTest.java",
+    "backend/src/test/java/com/youzhi/zhixun/controller/RetrievalDiagnosticsControllerTest.java",
     "backend/src/test/java/com/youzhi/zhixun/embedding/OpenAiCompatibleEmbeddingClientTest.java",
     "backend/src/test/java/com/youzhi/zhixun/knowledge/JsonlKnowledgeSourceTest.java",
     "backend/src/test/java/com/youzhi/zhixun/retrieval/InMemoryRagQueryServiceTest.java",
@@ -52,18 +58,26 @@
     "docs/QUALITY.md",
     "docs/HARNESS_GUIDE.md",
     "docs/KNOWLEDGE_IMPORT.md",
+    "docs/RETRIEVAL_TUNING.md",
     "docs/tasks/TEMPLATE.md",
     "harness/quality-baseline.json",
     "harness/rag-evaluation/dataset.schema.json",
     "harness/rag-evaluation/prediction.schema.json",
     "harness/rag-evaluation/dataset.sample.jsonl",
     "harness/rag-evaluation/predictions.sample.jsonl",
+    "harness/retrieval-evaluation/dataset.schema.json",
+    "harness/retrieval-evaluation/prediction.schema.json",
+    "harness/retrieval-evaluation/dataset.sample.jsonl",
+    "harness/retrieval-evaluation/predictions.sample.jsonl",
     "scripts/check_harness.py",
+    "scripts/collect_retrieval_predictions.py",
     "scripts/import_knowledge.py",
     "scripts/publish.ps1",
     "scripts/rag_eval.py",
+    "scripts/retrieval_eval.py",
     "scripts/verify.ps1",
     "tests/test_check_harness.py",
+    "tests/test_collect_retrieval_predictions.py",
     "tests/test_import_knowledge.py",
     "tests/test_rag_eval.py",
     ".github/workflows/ci.yml"
@@ -75,7 +89,8 @@
     "uploads/",
     "logs/",
     "tmp/",
-    "harness/rag-evaluation/runs/"
+    "harness/rag-evaluation/runs/",
+    "harness/retrieval-evaluation/runs/"
   ],
   "forbiddenControllerImports": [
     "repository",
@@ -94,6 +109,26 @@
       "forbiddenDocumentLeakRate": 0.0,
       "requiredTermCoverage": 1.0,
       "forbiddenTermLeakRate": 0.0,
+      "maxP95LatencyMs": 5000
+    }
+  },
+  "retrievalEvaluation": {
+    "dataset": "harness/retrieval-evaluation/dataset.sample.jsonl",
+    "samplePredictions": "harness/retrieval-evaluation/predictions.sample.jsonl",
+    "config": {
+      "topK": 4,
+      "minScore": 0.45
+    },
+    "thresholds": {
+      "caseCoverage": 1.0,
+      "answerabilityAccuracy": 1.0,
+      "requiredDocumentRecallAtK": 1.0,
+      "hitRateAtK": 1.0,
+      "mrrAtK": 1.0,
+      "ndcgAtK": 1.0,
+      "maxForbiddenCandidateLeakRate": 0.0,
+      "maxForbiddenSelectedLeakRate": 0.0,
+      "maxDuplicateDocumentRate": 0.0,
       "maxP95LatencyMs": 5000
     }
   }

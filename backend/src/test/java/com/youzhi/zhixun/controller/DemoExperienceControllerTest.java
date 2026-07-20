@@ -62,4 +62,18 @@ class DemoExperienceControllerTest {
             .andExpect(jsonPath("$.grounded").value(false))
             .andExpect(jsonPath("$.citations.length()").value(0));
     }
+
+    @Test
+    void retrievalDiagnosticsRouteIsAbsentByDefault() throws Exception {
+        String payload = objectMapper.writeValueAsString(Map.of(
+            "question", "虚构测试问题",
+            "limit", 4
+        ));
+
+        mockMvc.perform(post("/api/admin/retrieval-diagnostics")
+                .with(csrf())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isNotFound());
+    }
 }

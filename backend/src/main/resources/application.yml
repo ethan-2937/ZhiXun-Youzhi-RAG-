@@ -45,6 +45,9 @@ app:
       min-score: ${RAG_MIN_SCORE:0.45}
       max-citations: ${RAG_MAX_CITATIONS:3}
       max-excerpt-chars: ${RAG_MAX_EXCERPT_CHARS:260}
+    diagnostics:
+      enabled: ${RAG_DIAGNOSTICS_ENABLED:false}
+      max-candidates: ${RAG_DIAGNOSTICS_MAX_CANDIDATES:50}
   auth:
     mode: ${APP_AUTH_MODE:demo}
     allowed-corp-id: ${DINGTALK_CORP_ID:}

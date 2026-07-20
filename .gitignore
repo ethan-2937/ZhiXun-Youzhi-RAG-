@@ -13,6 +13,8 @@ logs/
 tmp/
 harness/rag-evaluation/runs/
 harness/rag-evaluation/predictions.local.jsonl
+harness/retrieval-evaluation/runs/
+harness/retrieval-evaluation/predictions.local.jsonl
 
 # Java, Node, Python and IDE output
 target/
