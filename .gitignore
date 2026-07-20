@@ -1,0 +1,29 @@
+# Local secrets and runtime configuration
+.env
+.env.*
+!.env.example
+config/.env
+*.pem
+*.key
+
+# Runtime data and generated evaluation output
+data/
+uploads/
+logs/
+tmp/
+harness/rag-evaluation/runs/
+harness/rag-evaluation/predictions.local.jsonl
+
+# Java, Node, Python and IDE output
+target/
+node_modules/
+dist/
+.vite/
+coverage/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

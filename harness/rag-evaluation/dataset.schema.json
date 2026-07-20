@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://example.invalid/youzhi-rag/dataset-case.schema.json",
+  "title": "YuoZhi RAG evaluation case",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["caseId", "question", "principal", "scope", "expected"],
+  "properties": {
+    "caseId": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9-]{2,63}$"
+    },
+    "question": {
+      "type": "string",
+      "minLength": 2,
+      "maxLength": 1000
+    },
+    "principal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["userId", "departmentIds", "roleCodes"],
+      "properties": {
+        "userId": {"type": "string", "pattern": "^test-user-[a-z0-9-]+$"},
+        "departmentIds": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^DEPT_TEST_[A-Z0-9_]+$"}
+        },
+        "roleCodes": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^ROLE_TEST_[A-Z0-9_]+$"}
+        }
+      }
+    },
+    "scope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["spaceIds"],
+      "properties": {
+        "spaceIds": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 10,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^space-test-[a-z0-9-]+$"}
+        }
+      }
+    },
+    "expected": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "answerable",
+        "requiredDocumentIds",
+        "forbiddenDocumentIds",
+        "requiredTerms",
+        "forbiddenTerms"
+      ],
+      "properties": {
+        "answerable": {"type": "boolean"},
+        "requiredDocumentIds": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^doc-test-[a-z0-9-]+$"}
+        },
+        "forbiddenDocumentIds": {
+          "type": "array",
+          "maxItems": 20,
+          "uniqueItems": true,
+          "items": {"type": "string", "pattern": "^doc-test-[a-z0-9-]+$"}
+        },
+        "requiredTerms": {
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 80}
+        },
+        "forbiddenTerms": {
+          "type": "array",
+          "maxItems": 30,
+          "uniqueItems": true,
+          "items": {"type": "string", "minLength": 1, "maxLength": 80}
+        }
+      }
+    }
+  }
+}

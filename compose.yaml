@@ -1,0 +1,83 @@
+name: ${COMPOSE_PROJECT_NAME:-zhixun}
+
+services:
+  backend:
+    image: zhixun-backend:${IMAGE_TAG:-local}
+    build:
+      context: ./backend
+    environment:
+      APP_AUTH_MODE: ${APP_AUTH_MODE:-demo}
+      APP_PORT: 8088
+      APP_SESSION_TIMEOUT: ${APP_SESSION_TIMEOUT:-8h}
+      APP_SESSION_COOKIE_SECURE: ${APP_SESSION_COOKIE_SECURE:-false}
+      DINGTALK_CORP_ID: ${DINGTALK_CORP_ID:-}
+      DINGTALK_CLIENT_ID: ${DINGTALK_CLIENT_ID:-}
+      DINGTALK_CLIENT_SECRET: ${DINGTALK_CLIENT_SECRET:-}
+      DINGTALK_AUTH_CODE_REPLAY_TTL: ${DINGTALK_AUTH_CODE_REPLAY_TTL:-5m}
+      RAG_ENABLED: ${RAG_ENABLED:-false}
+      EMBEDDING_BASE_URL: ${EMBEDDING_BASE_URL:-http://127.0.0.1:11434/v1}
+      EMBEDDING_API_KEY: ${EMBEDDING_API_KEY:-}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1024}
+      EMBEDDING_BATCH_SIZE: ${EMBEDDING_BATCH_SIZE:-8}
+      EMBEDDING_MAX_INPUT_CHARS: ${EMBEDDING_MAX_INPUT_CHARS:-1600}
+      RAG_KNOWLEDGE_FILE: ${RAG_KNOWLEDGE_FILE:-/knowledge/documents.jsonl}
+      RAG_RAW_DIRECTORY: ${RAG_RAW_DIRECTORY:-/knowledge/raw}
+      RAG_MAX_RAW_FILE_BYTES: ${RAG_MAX_RAW_FILE_BYTES:-52428800}
+      RAG_MAX_PREVIEW_CHARS: ${RAG_MAX_PREVIEW_CHARS:-50000}
+      RAG_CHUNK_CHARS: ${RAG_CHUNK_CHARS:-1200}
+      RAG_CHUNK_OVERLAP_CHARS: ${RAG_CHUNK_OVERLAP_CHARS:-120}
+    expose:
+      - "8088"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "3", "-O", "/dev/null", "http://127.0.0.1:8088/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    init: true
+    read_only: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=64m,mode=1777
+    volumes:
+      - ./data/knowledge:/knowledge:ro
+    mem_limit: ${BACKEND_MEMORY_LIMIT:-768m}
+    networks:
+      - app
+      - egress
+
+  frontend:
+    image: zhixun-frontend:${IMAGE_TAG:-local}
+    build:
+      context: ./frontend
+    depends_on:
+      backend:
+        condition: service_healthy
+    ports:
+      - "${APP_BIND_ADDRESS:-127.0.0.1}:${APP_HTTP_PORT:-18080}:8080"
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "3", "-O", "/dev/null", "http://127.0.0.1:8080/api/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
+    init: true
+    read_only: true
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    tmpfs:
+      - /tmp:size=32m,mode=1777
+    mem_limit: ${FRONTEND_MEMORY_LIMIT:-128m}
+    networks:
+      - app
+      - edge
+
+networks:
+  app:
+    internal: true
+  edge:
+  egress:

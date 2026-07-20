@@ -1,0 +1,245 @@
+:root {
+  --ink: #18202a;
+  --ink-soft: #35404c;
+  --muted: #717985;
+  --muted-light: #9aa1aa;
+  --canvas: #f3f5f7;
+  --surface: #ffffff;
+  --surface-soft: #f8f9fb;
+  --blue: #3157e8;
+  --blue-deep: #2445c5;
+  --blue-soft: #edf1ff;
+  --green: #218c64;
+  --green-soft: #eaf7f1;
+  --amber: #ba781c;
+  --amber-soft: #fff7e8;
+  --line: #e4e7eb;
+  --line-strong: #d5d9df;
+  --shadow: 0 24px 60px rgba(25, 34, 46, 0.08);
+  font-family: "MiSans", "HarmonyOS Sans SC", "Noto Sans SC", "Microsoft YaHei UI", sans-serif;
+  color: var(--ink);
+  background: var(--canvas);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  min-width: 320px;
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 84% -8%, rgba(49, 87, 232, 0.1), transparent 32%),
+    linear-gradient(180deg, #f7f8fa 0, var(--canvas) 45%);
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  color: inherit;
+}
+
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid rgba(49, 87, 232, 0.2);
+  outline-offset: 2px;
+}
+
+.app-shell {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+}
+
+.topbar {
+  position: relative;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+  padding: 0 max(28px, calc((100vw - 1560px) / 2));
+  border-bottom: 1px solid rgba(213, 217, 223, 0.72);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(18px);
+}
+
+.brand-lockup,
+.topbar-actions,
+.topbar-center,
+.profile-chip,
+.workspace-toolbar,
+.workspace-metrics,
+.scope-title,
+.rail-header,
+.composer-actions,
+.answer-state {
+  display: flex;
+  align-items: center;
+}
+
+.brand-lockup {
+  gap: 11px;
+}
+
+.brand-seal,
+.auth-seal {
+  position: relative;
+  display: grid;
+  width: 34px;
+  height: 34px;
+  place-items: center;
+  overflow: hidden;
+  border-radius: 10px;
+  background: linear-gradient(145deg, #4166ee, var(--blue-deep));
+  box-shadow: 0 7px 18px rgba(49, 87, 232, 0.22);
+}
+
+.brand-seal::before,
+.brand-seal::after,
+.auth-seal::before,
+.auth-seal::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: white;
+}
+
+.brand-seal::before,
+.auth-seal::before {
+  left: 9px;
+  top: 9px;
+}
+
+.brand-seal::after,
+.auth-seal::after {
+  right: 9px;
+  bottom: 9px;
+}
+
+.brand-seal span,
+.auth-seal span {
+  width: 12px;
+  height: 1px;
+  transform: rotate(-45deg);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.brand-lockup strong,
+.brand-lockup small,
+.profile-chip strong,
+.profile-chip small {
+  display: block;
+}
+
+.brand-lockup strong {
+  font-size: 18px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+
+.brand-lockup small,
+.profile-chip small {
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.topbar-actions {
+  gap: 22px;
+}
+
+.topbar-center {
+  gap: 8px;
+}
+
+.demo-pill,
+.connection-state {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  color: var(--muted);
+  background: var(--surface-soft);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.demo-pill {
+  color: #7a561f;
+  background: var(--amber-soft);
+}
+
+.connection-state i,
+.workspace-metrics i {
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(33, 140, 100, 0.1);
+}
+
+.profile-chip {
+  gap: 9px;
+  padding-left: 20px;
+  border-left: 1px solid var(--line);
+}
+
+.profile-chip > span {
+  display: grid;
+  width: 32px;
+  height: 32px;
+  place-items: center;
+  border-radius: 10px;
+  color: var(--blue-deep);
+  background: var(--blue-soft);
+  font-size: 13px;
+  font-weight: 750;
+}
+
+.profile-chip strong {
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.workspace {
+  display: grid;
+  width: min(1560px, calc(100% - 32px));
+  height: calc(100vh - 94px);
+  grid-template-columns: 284px minmax(0, 1fr);
+  margin: 14px auto 12px;
+  overflow: hidden;
+  border: 1px solid rgba(213, 217, 223, 0.88);
+  border-radius: 18px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+}
+
+.icon-button {
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.mobile-menu {
+  display: none;
+}
