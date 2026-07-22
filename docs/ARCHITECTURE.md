@@ -9,8 +9,9 @@
 上传/同步 -> 对象存储 -> 解析 Worker -> 分块/Embedding -> PostgreSQL + pgvector
 
 问题 + 当前用户 -> AuthorizedRetrievalService
-                -> ACL 前置过滤 + 混合检索 + Reranker
-                -> 有界上下文 -> ChatModel -> 引用二次校验 -> SSE
+                -> ACL 前置过滤 + 检索
+                -> 可选有界 Agent 规划（最多两轮）
+                -> 有界上下文 -> ChatModel -> 引用二次校验
 ```
 
 ## 边界
@@ -22,6 +23,7 @@
 - `ingestion`：上传、解析、切分、Embedding 和发布。
 - `retrieval`：唯一允许访问向量/关键词检索的业务入口，始终携带授权主体。
 - `chat`：会话、流式回答、引用和反馈。
+- `agent`：只读检索规划、证据预算、生成和引用白名单；不持有身份裁决或通用工具。
 - `admin`：配置、任务、审计和指标。
 
 ## 依赖方向

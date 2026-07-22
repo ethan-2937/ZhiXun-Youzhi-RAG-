@@ -8,6 +8,8 @@ import java.time.Duration;
 public class RagProperties {
     private boolean enabled;
     private Embedding embedding = new Embedding();
+    private Chat chat = new Chat();
+    private Agent agent = new Agent();
     private Knowledge knowledge = new Knowledge();
     private Retrieval retrieval = new Retrieval();
     private Diagnostics diagnostics = new Diagnostics();
@@ -27,6 +29,11 @@ public class RagProperties {
     public void setEmbedding(Embedding embedding) {
         this.embedding = embedding;
     }
+
+    public Chat getChat() { return chat; }
+    public void setChat(Chat chat) { this.chat = chat; }
+    public Agent getAgent() { return agent; }
+    public void setAgent(Agent agent) { this.agent = agent; }
 
     public Knowledge getKnowledge() {
         return knowledge;
@@ -78,6 +85,68 @@ public class RagProperties {
         public void setReadTimeout(Duration readTimeout) { this.readTimeout = readTimeout; }
         public int getMaxInputChars() { return maxInputChars; }
         public void setMaxInputChars(int maxInputChars) { this.maxInputChars = maxInputChars; }
+    }
+
+    public static class Chat {
+        private String baseUrl = "http://127.0.0.1:11434/v1";
+        private String apiKey = "";
+        private String model = "qwen-plus";
+        private Duration connectTimeout = Duration.ofSeconds(3);
+        private Duration readTimeout = Duration.ofSeconds(60);
+        private int maxRequestChars = 20_000;
+        private int maxResponseChars = 12_000;
+        private int maxOutputTokens = 800;
+
+        public String getBaseUrl() { return baseUrl; }
+        public void setBaseUrl(String baseUrl) { this.baseUrl = baseUrl; }
+        public String getApiKey() { return apiKey; }
+        public void setApiKey(String apiKey) { this.apiKey = apiKey; }
+        public String getModel() { return model; }
+        public void setModel(String model) { this.model = model; }
+        public Duration getConnectTimeout() { return connectTimeout; }
+        public void setConnectTimeout(Duration connectTimeout) { this.connectTimeout = connectTimeout; }
+        public Duration getReadTimeout() { return readTimeout; }
+        public void setReadTimeout(Duration readTimeout) { this.readTimeout = readTimeout; }
+        public int getMaxRequestChars() { return maxRequestChars; }
+        public void setMaxRequestChars(int maxRequestChars) { this.maxRequestChars = maxRequestChars; }
+        public int getMaxResponseChars() { return maxResponseChars; }
+        public void setMaxResponseChars(int maxResponseChars) { this.maxResponseChars = maxResponseChars; }
+        public int getMaxOutputTokens() { return maxOutputTokens; }
+        public void setMaxOutputTokens(int maxOutputTokens) { this.maxOutputTokens = maxOutputTokens; }
+    }
+
+    public static class Agent {
+        private boolean enabled;
+        private int maxQueries = 3;
+        private int maxRounds = 2;
+        private int maxQueryChars = 500;
+        private int candidateTopK = 8;
+        private double minScore = 0.30;
+        private int maxEvidence = 6;
+        private int maxContextChars = 8000;
+        private int maxContextTokens = 6000;
+        private int maxAnswerChars = 4000;
+
+        public boolean isEnabled() { return enabled; }
+        public void setEnabled(boolean enabled) { this.enabled = enabled; }
+        public int getMaxQueries() { return maxQueries; }
+        public void setMaxQueries(int maxQueries) { this.maxQueries = maxQueries; }
+        public int getMaxRounds() { return maxRounds; }
+        public void setMaxRounds(int maxRounds) { this.maxRounds = maxRounds; }
+        public int getMaxQueryChars() { return maxQueryChars; }
+        public void setMaxQueryChars(int maxQueryChars) { this.maxQueryChars = maxQueryChars; }
+        public int getCandidateTopK() { return candidateTopK; }
+        public void setCandidateTopK(int candidateTopK) { this.candidateTopK = candidateTopK; }
+        public double getMinScore() { return minScore; }
+        public void setMinScore(double minScore) { this.minScore = minScore; }
+        public int getMaxEvidence() { return maxEvidence; }
+        public void setMaxEvidence(int maxEvidence) { this.maxEvidence = maxEvidence; }
+        public int getMaxContextChars() { return maxContextChars; }
+        public void setMaxContextChars(int maxContextChars) { this.maxContextChars = maxContextChars; }
+        public int getMaxContextTokens() { return maxContextTokens; }
+        public void setMaxContextTokens(int maxContextTokens) { this.maxContextTokens = maxContextTokens; }
+        public int getMaxAnswerChars() { return maxAnswerChars; }
+        public void setMaxAnswerChars(int maxAnswerChars) { this.maxAnswerChars = maxAnswerChars; }
     }
 
     public static class Knowledge {

@@ -26,7 +26,8 @@ import java.util.List;
 import java.util.Map;
 
 @Service
-public class InMemoryRagQueryService implements RagQueryService, RetrievalDiagnosticsService {
+public class InMemoryRagQueryService implements RagQueryService,
+    RetrievalDiagnosticsService, AuthorizedKnowledgeSearch {
     private static final String MODE = "REAL_EMBEDDING_RETRIEVAL";
 
     private final RagProperties properties;
@@ -121,6 +122,34 @@ public class InMemoryRagQueryService implements RagQueryService, RetrievalDiagno
     }
 
     @Override
+    public boolean hasAuthorizedKnowledge(String spaceId, String userId) {
+        ensureReady();
+        return index.stream().anyMatch(item -> isAuthorized(item.chunk().allowedUserIds(), userId)
+            && (spaceId == null || spaceId.isBlank() || item.chunk().spaceId().equals(spaceId)));
+    }
+
+    @Override
+    public List<AuthorizedEvidence> search(
+        String question,
+        String spaceId,
+        String userId,
+        int limit,
+        double minScore
+    ) {
+        ensureReady();
+        if (question == null || question.isBlank() || question.length() > 1000
+            || limit < 1 || limit > 20 || minScore < -1 || minScore > 1) {
+            throw indexError("授权检索请求超过允许范围");
+        }
+        return rankAuthorized(question, spaceId, userId, limit).stream()
+            .filter(item -> item.score() >= minScore)
+            .map(item -> new AuthorizedEvidence(item.chunk().documentId(), item.chunk().chunkId(),
+                item.chunk().title(), item.chunk().section(), item.chunk().content(),
+                item.chunk().updatedAt(), item.score()))
+            .toList();
+    }
+
+    @Override
     public RetrievalDiagnosticsVO diagnose(String question, String spaceId, int limit, String userId) {
         if (!properties.getDiagnostics().isEnabled()) {
             throw new RagException("RAG_DIAGNOSTICS_DISABLED", "检索诊断未启用", HttpStatus.NOT_FOUND);
@@ -156,9 +185,7 @@ public class InMemoryRagQueryService implements RagQueryService, RetrievalDiagno
             .toList();
     }
 
-    private double roundedScore(double score) {
-        return Math.round(score * 1_000_000d) / 1_000_000d;
-    }
+    private double roundedScore(double score) { return Math.round(score * 1_000_000d) / 1_000_000d; }
 
     private List<KnowledgeSpaceVO> buildSpaces(List<KnowledgeDocument> authorized) {
         Map<String, List<KnowledgeDocument>> bySpace = new LinkedHashMap<>();
@@ -287,9 +314,6 @@ public class InMemoryRagQueryService implements RagQueryService, RetrievalDiagno
         return new RagException("RAG_INDEX_UNAVAILABLE", message, HttpStatus.SERVICE_UNAVAILABLE);
     }
 
-    private record EmbeddedChunk(KnowledgeChunk chunk, float[] vector) {
-    }
-
-    private record ScoredChunk(KnowledgeChunk chunk, double score) {
-    }
+    private record EmbeddedChunk(KnowledgeChunk chunk, float[] vector) { }
+    private record ScoredChunk(KnowledgeChunk chunk, double score) { }
 }

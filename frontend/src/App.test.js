@@ -53,6 +53,26 @@ describe('MVP experience', () => {
     expect(fetchMock.mock.calls[2][1].headers['X-XSRF-TOKEN']).toBe('fictional-csrf-token')
   })
 
+  it('labels the bounded Agentic RAG mode without calling it demo content', async () => {
+    const agentWorkspace = {
+      ...DEMO_WORKSPACE,
+      releaseLabel: 'Agentic RAG · 受控试运行',
+      user: { ...DEMO_WORKSPACE.user, mode: 'AGENTIC_RAG' }
+    }
+    const fetchMock = vi.fn()
+      .mockResolvedValueOnce(jsonResponse(AUTH_CONFIG))
+      .mockResolvedValueOnce(jsonResponse({ code: 'AUTH_REQUIRED' }, false, 401))
+      .mockResolvedValueOnce(jsonResponse(DEMO_USER))
+      .mockResolvedValueOnce(jsonResponse(agentWorkspace))
+    vi.stubGlobal('fetch', fetchMock)
+
+    const wrapper = mount(App)
+    await flushPromises()
+
+    expect(wrapper.text()).toContain('受控 Agentic RAG 已启用')
+    expect(wrapper.text()).not.toContain('当前为演示环境，内容均为虚构示例')
+  })
+
   it('submits a sample question and renders a grounded citation', async () => {
     const chatResponse = {
       status: 'answered',

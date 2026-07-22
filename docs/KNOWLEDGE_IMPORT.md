@@ -1,6 +1,6 @@
 # 真实语义检索试运行
 
-当前切片使用 OpenAI 兼容 Embedding 接口和进程内向量索引。它用于验证“外部知识导出 -> 分块 -> Embedding -> ACL 前置语义检索 -> 原文摘录与引用”，不包含生成式 ChatModel，也不替代后续 PostgreSQL/pgvector。
+当前切片使用 OpenAI 兼容 Embedding 接口和进程内向量索引。默认问答仍执行“外部知识导出 -> 分块 -> Embedding -> ACL 前置语义检索 -> 原文摘录与引用”；可通过独立开关启用有界 Agentic RAG 和生成式 ChatModel。它不替代后续 PostgreSQL/pgvector。
 
 ## 知识文件
 
@@ -61,6 +61,8 @@ docker compose logs backend --tail 100
 任何缺少 ACL、超限、模型超时、响应数量/索引/维度错误、零向量或非有限数值都会失败关闭，不回退到关键词或模型常识。
 
 当前公司 Embedding 网关对长中文文本批处理较敏感。本地 MVP 使用兼容配置 `EMBEDDING_BATCH_SIZE=1`、`EMBEDDING_MAX_INPUT_CHARS=500`、`RAG_CHUNK_CHARS=300`、`RAG_CHUNK_OVERLAP_CHARS=40`；通用默认预算仍保留在 `.env.example`，更换服务后应重新压测再调整。
+
+Agentic 模式、对话模型配置、上下文预算和安全降级见 `docs/AGENTIC_RAG.md`。
 
 ## 钉钉知识空间
 

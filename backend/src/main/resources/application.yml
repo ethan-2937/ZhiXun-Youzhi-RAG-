@@ -29,6 +29,26 @@ app:
       connect-timeout: ${EMBEDDING_CONNECT_TIMEOUT:3s}
       read-timeout: ${EMBEDDING_READ_TIMEOUT:30s}
       max-input-chars: ${EMBEDDING_MAX_INPUT_CHARS:1600}
+    chat:
+      base-url: ${CHAT_BASE_URL:${EMBEDDING_BASE_URL:http://127.0.0.1:11434/v1}}
+      api-key: ${CHAT_API_KEY:${EMBEDDING_API_KEY:}}
+      model: ${CHAT_MODEL:qwen-plus}
+      connect-timeout: ${CHAT_CONNECT_TIMEOUT:3s}
+      read-timeout: ${CHAT_READ_TIMEOUT:60s}
+      max-request-chars: ${CHAT_MAX_REQUEST_CHARS:20000}
+      max-response-chars: ${CHAT_MAX_RESPONSE_CHARS:12000}
+      max-output-tokens: ${CHAT_MAX_OUTPUT_TOKENS:800}
+    agent:
+      enabled: ${AGENTIC_RAG_ENABLED:false}
+      max-queries: ${AGENT_MAX_QUERIES:3}
+      max-rounds: ${AGENT_MAX_ROUNDS:2}
+      max-query-chars: ${AGENT_MAX_QUERY_CHARS:500}
+      candidate-top-k: ${AGENT_CANDIDATE_TOP_K:8}
+      min-score: ${AGENT_MIN_SCORE:0.30}
+      max-evidence: ${AGENT_MAX_EVIDENCE:6}
+      max-context-chars: ${AGENT_MAX_CONTEXT_CHARS:8000}
+      max-context-tokens: ${AGENT_MAX_CONTEXT_TOKENS:6000}
+      max-answer-chars: ${AGENT_MAX_ANSWER_CHARS:4000}
     knowledge:
       file: ${RAG_KNOWLEDGE_FILE:/knowledge/documents.jsonl}
       raw-directory: ${RAG_RAW_DIRECTORY:/knowledge/raw}

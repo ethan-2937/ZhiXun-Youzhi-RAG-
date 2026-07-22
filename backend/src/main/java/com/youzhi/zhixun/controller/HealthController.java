@@ -18,7 +18,6 @@ public class HealthController {
 
     @GetMapping("/health")
     public Map<String, String> health() {
-        String mode = ragQueryService.isReady() ? "REAL_EMBEDDING_RETRIEVAL" : "DEMO_FIXTURE";
-        return Map.of("status", "UP", "mode", mode);
+        return Map.of("status", "UP", "mode", ragQueryService.mode());
     }
 }

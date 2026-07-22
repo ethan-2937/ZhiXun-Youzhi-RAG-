@@ -63,7 +63,8 @@
         <ConversationView
           :messages="messages"
           :sample-questions="workspace?.sampleQuestions || []"
-          :real-retrieval="workspace?.user?.mode === 'REAL_EMBEDDING_RETRIEVAL'"
+          :real-retrieval="['REAL_EMBEDDING_RETRIEVAL', 'AGENTIC_RAG'].includes(workspace?.user?.mode)"
+          :agentic-rag="workspace?.user?.mode === 'AGENTIC_RAG'"
           :busy="busy"
           @ask="askQuestion"
         />

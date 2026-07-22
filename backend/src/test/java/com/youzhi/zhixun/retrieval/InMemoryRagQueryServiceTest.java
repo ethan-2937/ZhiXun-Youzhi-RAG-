@@ -37,6 +37,7 @@ class InMemoryRagQueryServiceTest {
             .containsExactly("doc-authorized")
             .doesNotContain("doc-forbidden");
         assertThat(response.answer()).doesNotContain("禁止内容");
+        assertThat(service.hasAuthorizedKnowledge("space-test", "test-user-allowed")).isTrue();
 
         RetrievalDiagnosticsVO diagnostics = service.diagnose(
             "申请制度", "space-test", 10, "test-user-allowed"
@@ -44,6 +45,11 @@ class InMemoryRagQueryServiceTest {
         assertThat(diagnostics.hasAuthorizedCandidate()).isTrue();
         assertThat(diagnostics.candidates())
             .extracting(candidate -> candidate.documentId())
+            .containsOnly("doc-authorized")
+            .doesNotContain("doc-forbidden");
+        assertThat(service.search(
+            "申请制度", "space-test", "test-user-allowed", 10, -1
+        )).extracting(AuthorizedEvidence::documentId)
             .containsOnly("doc-authorized")
             .doesNotContain("doc-forbidden");
     }
@@ -64,6 +70,8 @@ class InMemoryRagQueryServiceTest {
         );
         service.initialize();
         int callsAfterIndexing = embeddingClient.calls.size();
+        assertThat(service.hasAuthorizedKnowledge("space-test", "test-user-denied")).isFalse();
+        assertThat(embeddingClient.calls).hasSize(callsAfterIndexing);
 
         DemoChatResponseVO response = service.answer("禁止内容", "space-test", "test-user-denied");
 
@@ -77,6 +85,10 @@ class InMemoryRagQueryServiceTest {
         );
         assertThat(diagnostics.hasAuthorizedCandidate()).isFalse();
         assertThat(diagnostics.candidates()).isEmpty();
+        assertThat(embeddingClient.calls).hasSize(callsAfterIndexing);
+        assertThat(service.search(
+            "禁止内容", "space-test", "test-user-denied", 10, -1
+        )).isEmpty();
         assertThat(embeddingClient.calls).hasSize(callsAfterIndexing);
     }
 

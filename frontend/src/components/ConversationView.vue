@@ -6,7 +6,11 @@
       <h1>今天想了解什么？</h1>
       <p>询问公司制度、办事流程或产品规范。每个结论都会附上可核验的资料来源。</p>
       <div class="demo-notice">
-        <i></i>{{ realRetrieval ? '真实语义检索已启用，当前回答为授权原文摘录' : '当前为演示环境，内容均为虚构示例' }}
+        <i></i>{{ agenticRag
+          ? '受控 Agentic RAG 已启用，回答经过授权检索和引用复核'
+          : realRetrieval
+            ? '真实语义检索已启用，当前回答为授权原文摘录'
+            : '当前为演示环境，内容均为虚构示例' }}
       </div>
     </div>
 
@@ -74,6 +78,7 @@ const props = defineProps({
   messages: { type: Array, default: () => [] },
   sampleQuestions: { type: Array, default: () => [] },
   realRetrieval: { type: Boolean, default: false },
+  agenticRag: { type: Boolean, default: false },
   busy: { type: Boolean, default: false }
 })
 

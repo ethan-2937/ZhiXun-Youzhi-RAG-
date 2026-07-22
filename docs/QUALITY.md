@@ -39,3 +39,11 @@ powershell -ExecutionPolicy Bypass -File scripts/verify.ps1
 - 参数扫描至少观察 Recall@K、MRR、nDCG、拒答准确率、重复文档率和 P95 延迟，不能只看单个演示问题。
 - 诊断接口默认关闭且不返回标题、正文、章节、摘录或模型上下文；生成结果只能写入忽略目录。
 - 完整操作流程和调参顺序见 `docs/RETRIEVAL_TUNING.md`。
+
+## Agentic RAG 规则
+
+- Agent 只能规划只读授权检索；服务端注入稳定主体和空间，模型输出不得包含或覆盖身份条件。
+- 规划和生成都使用严格 JSON、字段白名单、集合上限和字符/token 预算；不解析 Markdown 工具指令。
+- 当前主体没有授权候选时不调用 ChatModel；最多两轮检索，禁止开放式循环。
+- 模型引用必须属于本轮授权 evidence；越界引用、非法输出或模型失败时降级为抽取式回答或拒答。
+- Prompt、模型、轮数和上下文预算变化必须同时跑检索固定集、端到端固定集和 Agent 拒绝路径测试。
