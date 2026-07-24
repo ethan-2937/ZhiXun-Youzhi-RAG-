@@ -2,6 +2,7 @@
 @import "tailwindcss/theme.css" layer(theme) prefix(tw);
 @import "tailwindcss/utilities.css" layer(utilities) prefix(tw) source(none);
 @source "./components/AuthGate.vue";
+@source "./components/ConversationView.vue";
 
 .auth-canvas {
   background:
@@ -100,6 +101,165 @@
   transform: translateY(0);
 }
 
+.rag-conversation {
+  scrollbar-color: #d5d9df transparent;
+  scrollbar-width: thin;
+}
+
+.rag-launchpad {
+  animation: rag-launchpad-enter 260ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rag-welcome-symbol {
+  position: relative;
+  display: grid;
+  width: 52px;
+  height: 52px;
+  place-content: center;
+  gap: 6px;
+  overflow: hidden;
+  border: 1px solid #dfe5ff;
+  border-radius: 17px;
+  background: linear-gradient(145deg, white, var(--blue-soft));
+  box-shadow: 0 10px 30px rgba(49, 87, 232, 0.1);
+}
+
+.rag-welcome-symbol::after {
+  content: "";
+  position: absolute;
+  right: 9px;
+  bottom: 8px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--blue);
+  box-shadow: 0 0 0 4px rgba(49, 87, 232, 0.09);
+}
+
+.rag-welcome-symbol span {
+  display: block;
+  width: 21px;
+  height: 2px;
+  border-radius: 999px;
+  background: var(--blue);
+}
+
+.rag-welcome-symbol span:last-child {
+  width: 14px;
+  background: #8ca0ee;
+}
+
+.rag-mode-status {
+  color: #7d5d2b;
+  border-color: #eedfbe;
+  background: #fffaf0;
+}
+
+.rag-mode-status i {
+  background: #ca8a2c;
+}
+
+.rag-mode-status[data-mode="retrieval"] {
+  color: #315276;
+  border-color: #dbe5f2;
+  background: #f5f8fc;
+}
+
+.rag-mode-status[data-mode="retrieval"] i {
+  background: #477cb5;
+}
+
+.rag-mode-status[data-mode="agentic"] {
+  color: #28654f;
+  border-color: #d4e8df;
+  background: #f2faf6;
+}
+
+.rag-mode-status[data-mode="agentic"] i {
+  background: var(--green);
+}
+
+.rag-starter-button {
+  cursor: pointer;
+  transition: transform 160ms ease, background-color 160ms ease;
+}
+
+.rag-starter-button:hover {
+  transform: translateX(3px);
+  background: linear-gradient(90deg, rgba(49, 87, 232, 0.045), transparent 72%);
+}
+
+.rag-starter-button:active {
+  transform: translateX(1px);
+}
+
+.rag-message-enter {
+  animation: rag-message-enter 220ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.rag-answer-card[data-status="insufficient"] {
+  border-color: #ead7b5;
+  background: #fffdfa;
+}
+
+.rag-answer-state {
+  color: #236f54;
+}
+
+.rag-answer-state::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 0 3px rgba(33, 140, 100, 0.1);
+}
+
+.rag-answer-card[data-status="insufficient"] .rag-answer-state {
+  color: #94621d;
+}
+
+.rag-answer-card[data-status="insufficient"] .rag-answer-state::before {
+  background: var(--amber);
+  box-shadow: 0 0 0 3px rgba(186, 120, 28, 0.1);
+}
+
+.rag-file-badge {
+  display: grid;
+  width: 38px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid #d9dff5;
+  border-radius: 8px;
+  color: var(--blue);
+  background: white;
+  font-size: 10px;
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.rag-followup-button {
+  cursor: pointer;
+  transition: border-color 160ms ease, background-color 160ms ease;
+}
+
+.rag-followup-button:hover {
+  border-color: rgba(49, 87, 232, 0.32);
+  background: var(--blue-soft);
+}
+
+.rag-thinking-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--blue);
+  animation: rag-thinking 850ms ease-in-out infinite alternate;
+}
+
+.rag-thinking-dot:nth-child(2) { animation-delay: 150ms; }
+.rag-thinking-dot:nth-child(3) { animation-delay: 300ms; }
+
 @keyframes auth-frame-enter {
   from {
     opacity: 0;
@@ -120,14 +280,46 @@
   to { transform: translateX(300%); }
 }
 
+@keyframes rag-launchpad-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rag-message-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes rag-thinking {
+  from { opacity: 0.3; transform: translateY(1px); }
+  to { opacity: 1; transform: translateY(-2px); }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .auth-frame,
   .auth-status-spinner,
-  .auth-progress-track span {
+  .auth-progress-track span,
+  .rag-launchpad,
+  .rag-message-enter,
+  .rag-thinking-dot {
     animation: none;
   }
 
-  .auth-retry-button {
+  .auth-retry-button,
+  .rag-starter-button,
+  .rag-followup-button {
     transition: none;
   }
 

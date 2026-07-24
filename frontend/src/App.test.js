@@ -93,7 +93,7 @@ describe('MVP experience', () => {
     const wrapper = mount(App)
     await flushPromises()
 
-    const starter = wrapper.findAll('.starter-card')[0]
+    const starter = wrapper.findAll('[data-testid="starter-question"]')[0]
     await starter.trigger('click')
     await flushPromises()
 

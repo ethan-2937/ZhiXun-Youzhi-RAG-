@@ -124,11 +124,6 @@
   to { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes pulse {
-  from { opacity: 0.3; transform: translateY(1px); }
-  to { opacity: 1; transform: translateY(-2px); }
-}
-
 @media (max-width: 900px) {
   body {
     overflow: auto;
@@ -224,79 +219,6 @@
     display: none;
   }
 
-  .conversation {
-    padding: 20px 15px 25px;
-  }
-
-  .welcome-card {
-    align-items: flex-start;
-    padding: 25px 3px 16px;
-    text-align: left;
-  }
-
-  .welcome-symbol {
-    width: 45px;
-    height: 45px;
-    margin-bottom: 17px;
-    border-radius: 14px;
-  }
-
-  .welcome-card h1 {
-    font-size: 31px;
-  }
-
-  .welcome-card > p {
-    font-size: 12px;
-  }
-
-  .starter-grid {
-    grid-template-columns: 1fr;
-    gap: 7px;
-    margin-top: 15px;
-  }
-
-  .starter-card {
-    min-height: 70px;
-    padding: 12px 14px;
-  }
-
-  .starter-card small {
-    grid-column: auto;
-    grid-row: 1;
-  }
-
-  .starter-card span {
-    grid-column: 1;
-    grid-row: 2;
-  }
-
-  .starter-card b {
-    grid-column: 2;
-    grid-row: 1 / 3;
-    align-self: center;
-  }
-
-  .user-bubble {
-    max-width: 88%;
-  }
-
-  .answer-card {
-    padding: 18px;
-  }
-
-  .answer-state {
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .citation-card {
-    grid-template-columns: 32px 1fr;
-  }
-
-  .citation-card > b {
-    display: none;
-  }
-
   .composer-shell {
     padding: 8px 10px max(10px, env(safe-area-inset-bottom));
   }
@@ -318,27 +240,6 @@
     width: 38px;
     height: 38px;
     border-radius: 10px;
-  }
-}
-
-@media (max-height: 720px) and (min-width: 901px) {
-  .welcome-card {
-    padding-top: 22px;
-  }
-
-  .welcome-symbol {
-    width: 44px;
-    height: 44px;
-    margin-bottom: 13px;
-  }
-
-  .welcome-card h1 {
-    margin-top: 7px;
-    font-size: 36px;
-  }
-
-  .starter-card {
-    min-height: 82px;
   }
 }
 
