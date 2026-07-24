@@ -87,7 +87,6 @@ textarea:focus-visible {
 .workspace-metrics,
 .scope-title,
 .rail-header,
-.composer-actions,
 .answer-state {
   display: flex;
   align-items: center;
