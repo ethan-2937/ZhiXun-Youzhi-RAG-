@@ -74,6 +74,10 @@ if (Test-Path -LiteralPath (Join-Path $frontend "package.json")) {
             }
             Assert-ExitCode "Frontend dependency install"
         }
+        & $npm run lint
+        Assert-ExitCode "Frontend lint"
+        & $npm run typecheck
+        Assert-ExitCode "Frontend typecheck"
         & $npm test
         Assert-ExitCode "Frontend tests"
         & $npm run build
