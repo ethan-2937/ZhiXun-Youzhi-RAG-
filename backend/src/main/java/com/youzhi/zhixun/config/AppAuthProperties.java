@@ -3,11 +3,13 @@ package com.youzhi.zhixun.config;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
 import java.time.Duration;
+import java.util.List;
 
 @ConfigurationProperties(prefix = "app.auth")
 public class AppAuthProperties {
     private Mode mode = Mode.DEMO;
     private String allowedCorpId = "";
+    private List<String> allowedUserIds = List.of();
     private Duration replayTtl = Duration.ofMinutes(5);
     private Demo demo = new Demo();
     private DingTalk dingtalk = new DingTalk();
@@ -31,6 +33,14 @@ public class AppAuthProperties {
 
     public void setAllowedCorpId(String allowedCorpId) {
         this.allowedCorpId = allowedCorpId;
+    }
+
+    public List<String> getAllowedUserIds() {
+        return allowedUserIds;
+    }
+
+    public void setAllowedUserIds(List<String> allowedUserIds) {
+        this.allowedUserIds = allowedUserIds == null ? List.of() : List.copyOf(allowedUserIds);
     }
 
     public Duration getReplayTtl() {

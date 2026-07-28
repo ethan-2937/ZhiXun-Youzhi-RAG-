@@ -46,6 +46,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthConfigVO config(String csrfToken) {
         boolean ready = properties.getMode() == AppAuthProperties.Mode.DINGTALK
             && hasText(properties.getAllowedCorpId())
+            && hasAllowedUserIds()
             && hasText(properties.getDingtalk().getClientId())
             && hasText(properties.getDingtalk().getClientSecret());
         return new AuthConfigVO(
@@ -89,6 +90,13 @@ public class AuthServiceImpl implements AuthService {
 
         reserveAuthorizationCode(loginRequest.code());
         DingTalkIdentity identity = identityClient.exchangeAuthorizationCode(loginRequest.code());
+        if (!isAllowedUser(identity.userId())) {
+            throw new AuthException(
+                "DINGTALK_USER_NOT_ALLOWED",
+                "当前用户不在应用试用范围内",
+                HttpStatus.FORBIDDEN
+            );
+        }
         AuthenticatedPrincipal principal = new AuthenticatedPrincipal(
             identity.userId(),
             safe(identity.unionId()),
@@ -133,8 +141,23 @@ public class AuthServiceImpl implements AuthService {
     private boolean dingtalkReady() {
         return properties.getMode() == AppAuthProperties.Mode.DINGTALK
             && hasText(properties.getAllowedCorpId())
+            && hasAllowedUserIds()
             && hasText(properties.getDingtalk().getClientId())
             && hasText(properties.getDingtalk().getClientSecret());
+    }
+
+    private boolean hasAllowedUserIds() {
+        return properties.getAllowedUserIds().stream().anyMatch(this::hasText);
+    }
+
+    private boolean isAllowedUser(String userId) {
+        if (!hasText(userId)) {
+            return false;
+        }
+        return properties.getAllowedUserIds().stream()
+            .filter(this::hasText)
+            .map(String::trim)
+            .anyMatch(userId::equals);
     }
 
     private void reserveAuthorizationCode(String code) {

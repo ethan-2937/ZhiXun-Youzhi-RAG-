@@ -51,6 +51,7 @@ GET /api/auth/config -> 创建 Session 绑定的 CSRF Token
 钉钉工作台 + dingtalk 模式 -> requestAuthCode
                               -> POST /api/auth/dingtalk/inside
                               -> AccessToken + code 换稳定 userId/unionId
+                              -> 服务端稳定 userId 白名单
                               -> HttpOnly JSESSIONID
 ```
 

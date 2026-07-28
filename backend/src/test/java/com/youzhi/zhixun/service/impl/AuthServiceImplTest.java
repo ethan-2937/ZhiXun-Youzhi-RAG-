@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.security.core.context.SecurityContextHolder;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -64,6 +65,51 @@ class AuthServiceImplTest {
     }
 
     @Test
+    void userOutsideServerAllowlistIsRejectedWithoutCreatingSession() {
+        AppAuthProperties properties = dingtalkProperties();
+        DingTalkIdentityClient client = code -> new DingTalkIdentity(
+            "test-user-ding-not-allowed",
+            "test-union-ding-not-allowed",
+            "未授权测试用户"
+        );
+        AuthServiceImpl service = new AuthServiceImpl(properties, client);
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        assertThatThrownBy(() -> service.authenticateDingTalk(
+            new DingTalkLoginRequestVO("fictional-code-not-allowed", "corp-test-001"),
+            request
+        ))
+            .isInstanceOf(AuthException.class)
+            .satisfies(exception -> {
+                AuthException authException = (AuthException) exception;
+                assertThat(authException.getCode()).isEqualTo("DINGTALK_USER_NOT_ALLOWED");
+                assertThat(authException.getStatus()).isEqualTo(org.springframework.http.HttpStatus.FORBIDDEN);
+            })
+            .hasMessage("当前用户不在应用试用范围内");
+        assertThat(request.getSession(false)).isNull();
+    }
+
+    @Test
+    void missingUserAllowlistKeepsDingTalkLoginUnavailable() {
+        AppAuthProperties properties = dingtalkProperties();
+        properties.setAllowedUserIds(List.of());
+        AtomicInteger calls = new AtomicInteger();
+        AuthServiceImpl service = new AuthServiceImpl(properties, code -> {
+            calls.incrementAndGet();
+            return new DingTalkIdentity("test-user-ding-001", "", "测试用户");
+        });
+
+        assertThat(service.config("fictional-csrf-token").dingtalkReady()).isFalse();
+        assertThatThrownBy(() -> service.authenticateDingTalk(
+            new DingTalkLoginRequestVO("fictional-code-missing-list", "corp-test-001"),
+            new MockHttpServletRequest()
+        ))
+            .isInstanceOf(AuthException.class)
+            .hasMessage("钉钉免登配置尚未完成");
+        assertThat(calls).hasValue(0);
+    }
+
+    @Test
     void authorizationCodeCannotBeReplayed() {
         AppAuthProperties properties = dingtalkProperties();
         AtomicInteger calls = new AtomicInteger();
@@ -94,6 +140,7 @@ class AuthServiceImplTest {
         AppAuthProperties properties = new AppAuthProperties();
         properties.setMode(AppAuthProperties.Mode.DINGTALK);
         properties.setAllowedCorpId("corp-test-001");
+        properties.setAllowedUserIds(List.of("test-user-ding-001", "test-user-ding-002"));
         properties.getDingtalk().setClientId("fictional-client-id");
         properties.getDingtalk().setClientSecret("fictional-client-secret");
         return properties;

@@ -71,6 +71,7 @@ app:
   auth:
     mode: ${APP_AUTH_MODE:demo}
     allowed-corp-id: ${DINGTALK_CORP_ID:}
+    allowed-user-ids: ${DINGTALK_ALLOWED_USER_IDS:}
     replay-ttl: ${DINGTALK_AUTH_CODE_REPLAY_TTL:5m}
     demo:
       user-id: test-user-demo-001

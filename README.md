@@ -58,13 +58,15 @@ npm run dev
 
 1. 在服务器安装 Docker Engine 和 Compose Plugin。
 2. 将代码或已发布镜像部署到服务器，并从 `.env.example` 创建仅服务器可读的 `.env`。
-3. 设置 `APP_AUTH_MODE=dingtalk`、`APP_SESSION_COOKIE_SECURE=true` 和钉钉凭据；凭据由部署环境注入，不写入镜像。
+3. 设置 `APP_AUTH_MODE=dingtalk`、`APP_SESSION_COOKIE_SECURE=true`、钉钉凭据和 `DINGTALK_ALLOWED_USER_IDS`；凭据与真实用户 ID 由部署环境注入，不写入镜像。
 4. 执行 `docker compose up --build -d`，确认两个健康检查均为 `healthy`。
 5. 配置 HTTPS 域名反向代理到 `127.0.0.1:18080`，入口代理应覆盖并传递 `X-Forwarded-Proto=https`；再将该域名填写为钉钉 PC/移动端首页。
 
 当前 Compose 不包含业务持久卷，因为 MVP 仍使用内存虚构数据。后续引入 PostgreSQL、Redis、MinIO 时，应分别增加持久卷、备份和恢复验证，不能把数据写入应用容器层。
 
 Compose 使用隔离的应用内网连接前后端；前端另接入口网络用于发布宿主机端口，后端另接出站网络用于调用钉钉 OpenAPI。只有前端容器入口映射到宿主机。默认内存上限为后端 `768m`、前端 `128m`，可通过 `.env` 调整。
+
+与 Weekly Report 共用服务器时的隔离、HTTPS、私有知识传输、验收和回退步骤见 `docs/SERVER_DEPLOYMENT.md`。
 
 ## 统一验证
 
@@ -103,9 +105,10 @@ $env:APP_AUTH_MODE="demo"
 ```powershell
 $env:APP_AUTH_MODE="dingtalk"
 $env:DINGTALK_CORP_ID="<测试组织 CorpId>"
+$env:DINGTALK_ALLOWED_USER_IDS="<测试用户一 userId>,<测试用户二 userId>"
 $env:DINGTALK_CLIENT_ID="<应用 Client ID>"
 $env:DINGTALK_CLIENT_SECRET="<应用 Client Secret>"
 $env:APP_SESSION_COOKIE_SECURE="true"
 ```
 
-应用 PC/移动端首页建议配置为 `https://<受控域名>/?corpid=$CORPID$`。钉钉模式缺少组织或应用凭据时会失败关闭，不会自动回退到演示身份。
+应用 PC/移动端首页建议配置为 `https://<受控域名>/?corpid=$CORPID$`。钉钉模式缺少组织、稳定用户白名单或应用凭据时会失败关闭，不会自动回退到演示身份。工作台可见范围仍应只包含相同测试人员，但不能替代服务端白名单。
